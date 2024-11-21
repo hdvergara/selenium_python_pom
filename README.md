@@ -5,6 +5,14 @@
 Este proyecto tiene como objetivo automatizar tareas en navegadores web utilizando Python y Selenium WebDriver. Se ha
 implementado el patrón de diseño Page Object Model (POM) para mejorar la mantenibilidad y la organización del código.
 
+**Principales dependencias**
+
+1. **Allure:** Se utiliza para la generación de reportes, se debe tener el binario de Allure y configurada su variable de
+   entorno para la visualización de los reportes
+2. **Pytest:** Se utiliza para ejecutar los test
+3. **Loguru:** Se utiliza para la generación de logs por consola sin tener una configuración específica de logs
+4. **Pydantic:** Se utiliza para validar datos y gestionar configuraciones
+
 **Estructura del Proyecto**
 
 * **utils:** Esta carpeta contiene las principales funciones que se requieren para la
@@ -16,17 +24,20 @@ implementado el patrón de diseño Page Object Model (POM) para mejorar la mante
     * **browser_settings -> browser_settings.py:** Permite seleccionar el navegador a utilizar (Chrome, Firefox, Edge) a
       través de
       webdriver-manager.
-* **pages:** Paquete que contiene el mapeo de todos los elementos de cada vista de la aplicacion con los cuales vamos a
+* **pages:** Paquete que contiene el mapeo de todos los elementos de cada vista de la aplicación con los cuales vamos a
   interactuar
 * **test:** Paquete que contiene las pruebas unitarias individuales.
 
 **Requisitos Previos**
 
 * **Python:** Asegúrate de tener instalado Python 3.10 o superior.
-* **Pipenv:** Utilizado para gestionar las dependencias del proyecto.
+* **Pipenv:** Asegúrate de tener instalado la dependencia *Pipenv*. Es utilizado para gestionar las dependencias del
+  proyecto.
+    ```python
+   pip install pipenv
 
 **Nota:** Se recomienda trabajar con el IDE PyCharm dado que es un IDE nativo para trabajar con Python, aunque si se
-quiere trabajar con Visual Studio Code no hay ningun problema siempre y cuando se tengo configurado para Python.
+quiere trabajar con Visual Studio Code no hay ningún problema siempre y cuando se tengo configurado para Python.
 
 **Instalación**
 
@@ -34,7 +45,6 @@ quiere trabajar con Visual Studio Code no hay ningun problema siempre y cuando s
 2. **Crear y activar el entorno virtual:**
    ```python
    pipenv install
-   pipenv shell
 
 **Ejecución de pruebas**
 
@@ -47,19 +57,19 @@ Las pruebas se pueden ejecutar de las siguientes formas:
    ```python
    pytest -s    
 
-El anterior comando ejecuta todos los test que se encuentran en la carpeta **test** en la raiz del proyecto. Esta
-ejecución tampoco genera ningun tipo de reporte.
+El anterior comando ejecuta todos los test que se encuentran en la carpeta **test** en la raíz del proyecto. Esta
+ejecución tampoco genera ningún tipo de reporte.
 
 3. Abriendo la terminal dentro del proyecto, ejecutamos el siguiente comando:
     ```python
    pytest --alluredir=reports/allure-results
 
-Esta opción ejecuta todos los test que se encuentran en la carpeta **test** en la raiz del proyecto, esta ejecucion crea
-una carpeta en la raiz del proyecto llamada reports, dentro contendra informacion necesaria para la generacion y
-visualizacion del reporte.
+Esta opción ejecuta todos los test que se encuentran en la carpeta **test** en la raíz del proyecto, esta ejecución crea
+una carpeta en la raíz del proyecto llamada reports, dentro contendrá información necesaria para la generación y
+visualización del reporte.
 
 Para visualizar el reporte debemos ejecutar el siguiente comando:
 
     allure serve reports/allure-results
 
-Este comando nos abre un reporte en formato HTML el cual contiene la informacion de la ejecucion de las pruebas.
+Este comando nos abre un reporte en formato HTML el cual contiene la información de la ejecución de las pruebas.
