@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.eggs/
+dist/
+build/
+develop-eggs/
+eggs/
+lib/
+*.egg-info/
+.installed.cfg
+*.egg
+reports/
+
+# Unit test/coverage reports
+*.coverage
+.coverage*
+htmlcov/
+cover/
+.tox/
+.nox/
+.pytest_cache/
+nosetests.xml
+
+# Local configuration
+*.pem
+*.key
+*.pfx
+*.crt
+*.cer
+*.rsa
+id_rsa*
+private.key
+DS_Store
+.DS_Store
+.idea/
+
+# Files that should be tracked individually
+#  Use a separate section like this for each file:
+#  /path/to/file
