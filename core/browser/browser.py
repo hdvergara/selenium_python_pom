@@ -10,8 +10,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
-from utils.browser_settings.browser_type import BrowserType
-from utils.config.settings import settings
+from core.browser.browser_type import BrowserType
+from core.config.browser_config import browser_config
 
 
 class BrowserSettings:
@@ -23,8 +23,8 @@ class BrowserSettings:
         """
 
     def __init__(self):
-        self.browser_type = settings.browser
-        self.headless = settings.headless
+        self.browser_type = browser_config.browser
+        self.headless = browser_config.headless
         self.driver = None
 
     def get_driver(self):

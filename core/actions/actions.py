@@ -12,6 +12,9 @@ class Actions:
     def __init__(self, driver: WebDriver):
         self.driver = driver
 
+    def _wait_for_element(self, locator: tuple[str, str], timeout: int):
+        return WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
+
     def click(self, locator: tuple[str, str], timeout: int) -> None:
         """
         Clicks on a web element after waiting for it to be clickable.
@@ -31,10 +34,10 @@ class Actions:
             TimeoutException: If the element is not clickable within the specified timeout.
         """
         try:
-            element = WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable(locator))
+            element = self._wait_for_element(locator, timeout)
             element.click()
             logger.info(f"Clicked on element: '{locator}'")
-        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException, TimeoutException) as e:
+        except Exception as e:
             logger.error(f"Click on element '{locator}' failed:  {e}")
             raise
 
@@ -60,11 +63,11 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            element = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
+            element = self._wait_for_element(locator, timeout)
             element.clear()
             element.send_keys(text)
             logger.info(f"Entered '{text}' into '{locator}'")
-        except (NoSuchElementException, ElementNotVisibleException, ElementNotInteractableException, TimeoutException) as e:
+        except Exception as e:
             logger.error(f"Error writing to '{locator}': {e}")
             raise
 
@@ -90,11 +93,11 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            select_element = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
+            select_element = self._wait_for_element(locator, timeout)
             select = Select(select_element)
             select.select_by_value(value)
             logger.info(f"Value '{value}' selected from '{locator}'")
-        except (NoSuchElementException, ElementNotVisibleException, ElementNotInteractableException, TimeoutException) as e:
+        except Exception as e:
             logger.error(f"Error selecting value: {e}")
             raise
 
@@ -120,11 +123,11 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            select_element = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
+            select_element = self._wait_for_element(locator, timeout)
             select = Select(select_element)
             select.select_by_visible_text(value)
             logger.info(f"Value '{value}' selected from '{locator}'")
-        except (NoSuchElementException, ElementNotVisibleException, ElementNotInteractableException, TimeoutException) as e:
+        except Exception as e:
             logger.error(f"Error selecting value: {e}")
             raise
 
@@ -150,10 +153,10 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            element = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
+            element = self._wait_for_element(locator, timeout)
             logger.info(f"Captured text '{element.text}' from element '{locator}'")
             return element.text
-        except (NoSuchElementException, ElementNotVisibleException, TimeoutException) as e:
+        except Exception as e:
             logger.error(f"Error getting text from element: {e}")
 
     def is_visible(self, locator: tuple[str, str], timeout: int) -> bool:
@@ -178,9 +181,9 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            element = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
+            element = self._wait_for_element(locator, timeout)
             return element.is_displayed()
-        except (NoSuchElementException, ElementNotVisibleException, TimeoutException) as e:
+        except Exception as e:
             logger.error(f"Error checking visibility of element: {e}")
             return False
 
@@ -210,5 +213,5 @@ class Actions:
             actions = ActionChains(self.driver)
             actions.move_to_element(element).perform()
             logger.info("Mouse hover action on element completed successfully.")
-        except (NoSuchElementException, ElementNotVisibleException, TimeoutException) as e:
+        except Exception as e:
             logger.error(f"Failed to move to element: {e}")

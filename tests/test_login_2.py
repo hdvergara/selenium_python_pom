@@ -1,13 +1,14 @@
 import os
 
 import allure
-import pytest
 from dotenv import load_dotenv
 from loguru import logger
 
 from pages.login_page import LoginPage
 
 load_dotenv()
+
+
 @allure.feature('Login Feature')
 class TestLogin:
 

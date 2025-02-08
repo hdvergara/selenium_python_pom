@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 
-from utils.web_actions.actions import Actions
+from core.actions.actions import Actions
 
 
 class LoginPage:
