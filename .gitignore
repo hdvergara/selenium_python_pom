@@ -29,6 +29,8 @@ cover/
 nosetests.xml
 
 # Local configuration
+.env
+.env.local
 *.pem
 *.key
 *.pfx

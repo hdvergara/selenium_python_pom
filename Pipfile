@@ -5,16 +5,16 @@ name = "pypi"
 
 [packages]
 requests = "*"
-selenium = "*"
-webdriver-manager = "*"
+selenium = "==4.41.0"
 pytest = "*"
 python-dotenv = "*"
-pydantic = "*"
-pydantic-settings = "*"
+pydantic = "==2.12.5"
+pydantic-settings = "==2.13.1"
 loguru = "*"
 allure-pytest = "*"
 
 [dev-packages]
+pytest-xdist = "*"
 
 [requires]
 python_version = "3.12"

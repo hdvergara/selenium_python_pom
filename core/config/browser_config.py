@@ -1,15 +1,17 @@
-from dotenv import load_dotenv
-from pydantic.v1 import ConfigDict
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from core.browser.browser_type import BrowserType
 
-load_dotenv()
 
 class BrowserConfig(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="allow",
+    )
+
     browser: BrowserType = BrowserType.CHROME
     headless: bool = False
 
-    model_config = ConfigDict(env_file=".env", extra="allow")
 
 browser_config = BrowserConfig()

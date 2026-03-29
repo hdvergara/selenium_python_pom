@@ -1,14 +1,8 @@
 from loguru import logger
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.edge.service import Service as EdgeService
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from core.browser.browser_type import BrowserType
 from core.config.browser_config import browser_config
@@ -32,7 +26,9 @@ class BrowserSettings:
                 Initializes and configures a WebDriver instance based on the browser type.
 
                 Selects the appropriate browser driver (Chrome, Firefox, or Edge) and configures
-                it with headless mode if specified. Maximizes the browser window and returns the driver.
+                headless mode when enabled (Chrome/Edge: --headless=new; Firefox: -headless).
+                Maximizes the browser window and returns the driver.
+                Driver binaries are resolved via Selenium Manager (built into Selenium 4.6+); no Service/executable_path.
 
                 Raises:
                     ValueError: If the provided browser type is not supported.
@@ -42,29 +38,21 @@ class BrowserSettings:
             case BrowserType.CHROME:
                 options = ChromeOptions()
                 if self.headless:
-                    options.add_argument('--headless')
-                self.driver = webdriver.Chrome(
-                    service=ChromeService(ChromeDriverManager().install()),
-                    options=options
-                )
+                    options.add_argument("--headless=new")
+                self.driver = webdriver.Chrome(options=options)
             case BrowserType.FIREFOX:
                 options = FirefoxOptions()
                 options.set_preference("app.update.auto", False)
                 options.set_preference("app.update.enabled", False)
                 if self.headless:
-                    options.add_argument('--headless')
-                self.driver = webdriver.Firefox(
-                    service=FirefoxService(GeckoDriverManager().install()),
-                    options=options
-                )
+                    # Gecko: documented flag is -headless (not Chrome-style --headless).
+                    options.add_argument("-headless")
+                self.driver = webdriver.Firefox(options=options)
             case BrowserType.EDGE:
                 options = EdgeOptions()
                 if self.headless:
-                    options.add_argument('--headless')
-                self.driver = webdriver.Edge(
-                    service=EdgeService(EdgeChromiumDriverManager().install()),
-                    options=options
-                )
+                    options.add_argument("--headless=new")
+                self.driver = webdriver.Edge(options=options)
             case _:
                 raise ValueError(f"Browser not supported: {self.browser_type}")
 
