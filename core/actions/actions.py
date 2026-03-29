@@ -12,8 +12,11 @@ class Actions:
     def __init__(self, driver: WebDriver):
         self.driver = driver
 
-    def _wait_for_element(self, locator: tuple[str, str], timeout: int):
+    def _wait_for_visible(self, locator: tuple[str, str], timeout: int):
         return WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
+
+    def _wait_for_clickable(self, locator: tuple[str, str], timeout: int):
+        return WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable(locator))
 
     def click(self, locator: tuple[str, str], timeout: int) -> None:
         """
@@ -34,7 +37,7 @@ class Actions:
             TimeoutException: If the element is not clickable within the specified timeout.
         """
         try:
-            element = self._wait_for_element(locator, timeout)
+            element = self._wait_for_clickable(locator, timeout)
             element.click()
             logger.info(f"Clicked on element: '{locator}'")
         except Exception as e:
@@ -63,7 +66,7 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            element = self._wait_for_element(locator, timeout)
+            element = self._wait_for_visible(locator, timeout)
             element.clear()
             element.send_keys(text)
             logger.info(f"Entered '{text}' into '{locator}'")
@@ -93,7 +96,7 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            select_element = self._wait_for_element(locator, timeout)
+            select_element = self._wait_for_visible(locator, timeout)
             select = Select(select_element)
             select.select_by_value(value)
             logger.info(f"Value '{value}' selected from '{locator}'")
@@ -123,7 +126,7 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            select_element = self._wait_for_element(locator, timeout)
+            select_element = self._wait_for_visible(locator, timeout)
             select = Select(select_element)
             select.select_by_visible_text(value)
             logger.info(f"Value '{value}' selected from '{locator}'")
@@ -135,57 +138,71 @@ class Actions:
         """
         Retrieves the text content of a web element after waiting for it to be visible.
 
-        This method uses WebDriverWait to wait for the element to be visible within a
-        specified timeout before attempting to retrieve its text content. Logs success
-        and error messages.
-
         Args:
-            locator (tuple[str, str]): A tuple containing the locator type (e.g., By.ID, By.XPATH)
-                and the value of the locator (e.g., element ID, XPath expression).
-            timeout (int): The maximum wait time in seconds for the element to become visible.
+            locator (tuple[str, str]): Locator tuple (e.g. By.ID, value).
+            timeout (int): Maximum wait in seconds for the element to become visible.
 
         Returns:
-            str: The text content of the element, or an empty string if the element is not found.
+            str: The element's visible text.
 
         Raises:
-            NoSuchElementException: If the element is not found within the specified timeout.
-            ElementNotVisibleException: If the element is not visible within the timeout.
-            TimeoutException: If the element is not visible within the specified timeout.
+            TimeoutException: If the element does not become visible within the timeout.
+            Exception: Other Selenium errors (e.g. stale element), re-raised after logging.
         """
         try:
-            element = self._wait_for_element(locator, timeout)
-            logger.info(f"Captured text '{element.text}' from element '{locator}'")
-            return element.text
+            element = self._wait_for_visible(locator, timeout)
+            text = element.text
+            logger.info(f"Captured text '{text}' from element '{locator}'")
+            return text
+        except TimeoutException as e:
+            msg = (
+                f"get_text failed: element {locator} did not become visible within {timeout}s; "
+                "cannot read text."
+            )
+            logger.error(msg)
+            raise TimeoutException(msg) from e
         except Exception as e:
-            logger.error(f"Error getting text from element: {e}")
+            logger.error(f"get_text failed for element {locator}: {e}")
+            raise
 
     def is_visible(self, locator: tuple[str, str], timeout: int) -> bool:
         """
-        Checks if a web element is visible within a specified timeout.
+        Returns whether the element is visible within the given timeout.
 
-        This method uses WebDriverWait to wait for the element to be visible within a
-        specified timeout. If the element becomes visible, it returns True. Otherwise,
-        it logs an error and returns False.
+        If the wait times out, distinguishes between:
+        - No matching nodes in the DOM (locator did not match any element after the wait).
+        - At least one node exists but did not satisfy visibility within the timeout
+          (e.g. hidden, not yet rendered, or still loading).
 
         Args:
-            locator (tuple[str, str]): A tuple containing the locator type (e.g., By.ID, By.XPATH)
-                and the value of the locator (e.g., element ID, XPath expression).
-            timeout (int): The maximum wait time in seconds for the element to become visible.
+            locator (tuple[str, str]): Locator tuple (e.g. By.ID, value).
+            timeout (int): Maximum wait in seconds for visibility.
 
         Returns:
-            bool: True if the element is visible, False otherwise.
-
-        Raises:
-            NoSuchElementException: If the element is not found within the specified timeout.
-            ElementNotVisibleException: If the element is not visible within the timeout.
-            TimeoutException: If the element is not visible within the specified timeout.
+            bool: True if the element is visible; False if not visible after the scenarios above.
         """
         try:
-            element = self._wait_for_element(locator, timeout)
+            element = self._wait_for_visible(locator, timeout)
             return element.is_displayed()
-        except Exception as e:
-            logger.error(f"Error checking visibility of element: {e}")
+        except TimeoutException:
+            elements = self.driver.find_elements(*locator)
+            if not elements:
+                logger.warning(
+                    "Element {!r} not present in the DOM after {}s (visibility wait timed out).",
+                    locator,
+                    timeout,
+                )
+                return False
+            logger.warning(
+                "Element {!r} is in the DOM but did not become visible within {}s "
+                "(hidden, zero size, or still loading).",
+                locator,
+                timeout,
+            )
             return False
+        except Exception as e:
+            logger.error("Unexpected error checking visibility of {!r}: {}", locator, e)
+            raise
 
     def move_to_element(self, locator: tuple[str, str], timeout: int) -> None:
         """
@@ -207,11 +224,10 @@ class Actions:
             TimeoutException: If the element is not visible within the specified timeout.
         """
         try:
-            element = WebDriverWait(self.driver, timeout).until(
-                EC.visibility_of_element_located(locator)
-            )
+            element = self._wait_for_visible(locator, timeout)
             actions = ActionChains(self.driver)
             actions.move_to_element(element).perform()
             logger.info("Mouse hover action on element completed successfully.")
         except Exception as e:
             logger.error(f"Failed to move to element: {e}")
+            raise
