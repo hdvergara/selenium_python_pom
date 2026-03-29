@@ -289,7 +289,15 @@ The workflow is designed so **Allure is generated whether tests pass or fail** (
 ### Artifacts vs Pages
 
 - **Pull requests:** Download the **`allure-report`** zip from the workflow run summary (**Artifacts** section).
-- **Default branch (`main` / `master`):** Same artifact is available, and the report is also deployed to **GitHub Pages** when the deploy job completes.
+- **Default branch:** Same artifact is available, and the report is also deployed to **GitHub Pages** when the deploy job completes (only on **push** / **schedule** / **workflow_dispatch** to the repository **default branch**, not from PR workflows).
+
+### Troubleshooting: “Deploy” / Allure on Pages did not run
+
+1. **Pull request** — By design, **deploy** is skipped on `pull_request` events. Merge to the default branch or use **workflow_dispatch** on that branch to publish Pages.
+2. **Wrong branch** — Deploy runs only when `github.ref` is the **default branch** (e.g. `Settings → General → Default branch`). Pushes to feature branches run **build** + artifact, but **not** Pages upload/deploy.
+3. **Build job failed** — If **install**, **Chrome**, **pipenv**, or **Upload Pages artifact** fails, `needs.build.result` is not `success` and **deploy** is skipped. Open the **build** job log.
+4. **Environment protection** — If **github-pages** has **required reviewers**, the **deploy** job waits until approved (**Actions** → waiting job).
+5. **Pages source** — **Settings → Pages** must use **GitHub Actions** as the build source.
 
 ### MCP / API
 
